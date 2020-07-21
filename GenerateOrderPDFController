@@ -1,0 +1,34 @@
+({
+    doInit : function(component, event, helper) {
+        //alert('ok234')
+        //alert('hello222>>'+component.get('v.recordId'));
+        // create a one-time use instance of the serverEcho action
+        // in the server-side controller
+        debugger;
+        
+        var actionVersionName = component.get("c.getVersionPDF");
+        actionVersionName.setParams({ parentId : component.get("v.recordId")});
+        actionVersionName.setCallback(this, function(response) {
+            var state = response.getState();
+            if (state === "SUCCESS") {
+				
+                var action = component.get("c.generatePDF");
+                action.setParams({ parentId : component.get("v.recordId"),
+                                  name : response.getReturnValue()});
+                
+                action.setCallback(this, function(response) {
+                    var state = response.getState();
+                    if (state === "SUCCESS") {
+                        var dismissActionPanel = $A.get("e.force:closeQuickAction");
+                        dismissActionPanel.fire();
+                    }
+                    
+                });
+                $A.enqueueAction(action);
+
+            }
+            
+        });
+        $A.enqueueAction(actionVersionName);
+    }
+})
