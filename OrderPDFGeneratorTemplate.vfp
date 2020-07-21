@@ -1,0 +1,389 @@
+<apex:page applyBodyTag="false" controller="SOPdfPageController" renderas="PDF">
+    
+    <apex:stylesheet value="{!$Resource.PDF_header_footer_CSS}"/>
+    <STYLE type="text/css">
+        @page {  
+            size: A4 landscape; /* ISO/JIS A4 (210mm?297mm) */  
+            margin-top:80px;
+            margin-bottom:80px;
+        }
+        .styleForTable{
+            border-spacing: 0px;
+            border-top-width: 0px !IMPORTANT;
+            border-right-width: 0px !IMPORTANT;
+            border-bottom-width: 0px !IMPORTANT;
+            border-left-width: 0px !IMPORTANT;
+        }
+        .styleForHeader{
+            
+        }
+        .styleForTD{
+            text-align:right;
+            border-top-width: 0px !IMPORTANT;
+            border-right-width: 0px !IMPORTANT;
+            vertical-align: middle !IMPORTANT;
+        }
+        
+        .myStyle {
+        display: block;
+        margin-top: 1em;
+        }
+        
+        
+        
+        #footer {
+          position: absolute;
+          bottom: 0;
+        } 
+    </STYLE>
+     <c:PDFHeaderFooter type="footer" position="right" showPageNumbers="true"/>
+    <apex:image id="theImage" value="{!$Resource.Image}" width="173" height="78"/>
+    <center style="font-size:15px !important; font: bold 16px 'Arial';line-height: 18px;"><b>Sales Order</b></center>
+   
+    <table width="100%">
+       
+        <tr>
+            
+            <td width="100%">
+              
+                    <tr>     
+                        <td style="text-align: right;font: bold 11px 'Arial';line-height: 16px;"><b>Order Number: </b></td>
+                        <td style="text-align: left;font: 11px 'Microsoft Sans Serif';line-height: 17px">{!quoteNumber}</td> 
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;font: bold 11px 'Arial';line-height: 16px;"><b>Order Date: </b></td>
+                        <td style="text-align: left;font: 11px 'Microsoft Sans Serif';line-height: 17px">{!quoteDate}</td>
+                    </tr>
+                
+            </td>
+        </tr>
+    
+    </table>
+
+    <table width="100%">
+       
+        <tr>
+            <td width="40%">
+                <!--<table width="100%">-->
+                <!-- added width for one line state city zip-->
+                   
+                    <tr><td><b style="font: bold 11px 'Arial';line-height: 13px;">Sold To: </b></td></tr>
+                    <tr><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!accountName}</td></tr>
+                    <!--<tr><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!billingStreet}</td></tr>-->
+                    <tr style="display:{IF(billingStreet1!='','','none')}"><td style="display:{!if(billingStreet1=='','','none')} font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!billingStreet1}</td></tr>
+                    <tr style="display:{IF(billingStreet2!='','','none')}"><td style="display:{!if(billingStreet2=='','','none')} font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!billingStreet2}</td></tr>
+                    <tr style="display:{IF(billingStreet3!='','','none')}"><td style="display:{!if(billingStreet3=='','','none')} font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!billingStreet3}</td></tr>
+                    <tr><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!billingCity}, {!billingState} {!billingPostalCode}</td></tr>
+                <!--</table>-->
+            </td>           
+            <td width="20%">&nbsp;</td>
+            <td width="40%" >
+                <!--<table width="100%" >--> 
+                <!-- added width for one line state city zip-->
+                    <tr><td><b style="font: bold 11px 'Arial';line-height: 13px;">Ship To: </b></td></tr>
+                    <tr><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!shipToName}</td></tr>
+                    <!--<tr><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!shippingStreet}</td></tr>-->
+                     <tr style="display:{IF(shippingStreet1!='','','none')}"><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!shippingStreet1 }</td></tr>
+                     <tr style="display:{IF(shippingStreet2!='','','none')}"><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!shippingStreet2 }</td></tr>
+                     <tr style="display:{IF(shippingStreet3!='','','none')}"><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!shippingStreet3 }</td></tr>
+                    <tr><td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;"><span style="display:{!IF(shippingCity!='','','none')}">{!shippingCity},</span> {!shippingState} {!shippingPostalCode}</td></tr>
+                <!--</table>-->
+            </td>
+            
+        </tr>
+       
+    </table>
+    <br/>
+    <table style="float: right">
+        <tr id= "SalesPersonID">
+            <td style="font: bold 11px 'Arial';line-height: 13px; text-align: right;">Salesperson:</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: left; ">
+                {!salesCodeDesc[salesperson]}
+            </td>
+        </tr>
+        <tr>
+            <td style="font: bold 11px 'Arial';line-height: 13px; text-align: right;">Customer Number:</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: left;">
+            {!acctNumber}
+            </td>
+        </tr>
+        <tr>
+            <td style="font: bold 11px 'Arial';line-height: 13px; text-align: right;">Tax Schedule:</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: left;">{!taxSchedule}</td><!--{!taxCodeDesc[taxSchedule]}-->
+            </tr>
+    </table>
+    <br/>
+    <br/>
+    <br/>
+    <table width="100%">
+        <tr>
+            <td style="font: bold 11px 'Arial';line-height: 13px;" width="25%">Confirm To:</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;" width="25%">Email Address</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;" width="25%">Phone</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;" width="25%">Fax</td>
+        </tr>
+        <tr>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!contactName}</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!email}</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!phone}</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;">{!fax}</td>
+        </tr>
+    </table>
+    <br/>
+    <!-- working till here-->
+    
+    <table border="1" cellspacing="0" cellpadding="0" width="100%" style="border-left-width: 0px;border-right-width: 0px; border-bottom-width: 0px;">
+        <tr>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">Customer P.O.</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">&nbsp;</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;" colspan="4">Ship VIA</td>
+            <!--<td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">&nbsp;</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;"></td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">&nbsp;</td>-->
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">F.O.B</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">Terms</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">Ship Date</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px;border-bottom-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">{!PONumber}</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">&nbsp;</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;" colspan="4"><!--{!shipVia}-->
+                <!-- Error -->
+               <apex:outputText value="{!shipcodeDesc[shipVia]}"/> 
+            </td>
+
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">
+                {!strFOB}
+            </td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;"><apex:outputText value="{!termsCodeDesc[termsCode]}"/></td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">{!shipdate}</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;border-top-width: 0px; border-right-width: 0px; 
+                            border-left-width: 0px;">&nbsp;</td>
+
+        </tr>
+      
+        <tr>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;" width="20%">Item Number</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;">&nbsp;</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;" width="10%">Unit</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;">&nbsp;</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;">&nbsp;</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;">Ordered</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px; padding-left: 45px;">Shipped</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;" width="10% padding-left: 25px;">Back Order</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;" width="10%">UnitPrice</td>
+            <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;" width="10%">Amount</td>
+        </tr>
+       
+        <!-- working till here-->
+        
+            <apex:repeat value="{!ordItemData}" var="ord">
+           
+            <!--<span class="myStyle">-->
+            <tr style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                            border-left-width: 0px;">                           
+                            <span style="display:{!IF(ord.PricebookEntry.ProductCode =='/C','','none')}"></span>
+                            <span style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                                {!ord.PricebookEntry.ProductCode}
+                            </span>
+                            </td>
+                
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                            border-left-width: 0px;">&nbsp;</td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">{!ord.GUMU__UOM__c}</td>
+                <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;border-bottom-width: 0px;">&nbsp;</td>
+                <td style="font: bold 11px 'Arial';line-height: 13px; border-right-width: 0px; border-top-width: 0px;
+                            border-left-width: 0px;border-bottom-width: 0px;">&nbsp;</td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px; text-align: center;">
+                                <!--{!ord.Quantity}-->
+                                <span style="display:{!IF(ord.PricebookEntry.ProductCode =='/C','','none')}"></span>
+                                <span style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                                    {!ord.Quantity}
+                                </span>
+                                </td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px; text-align: center;">0.00</td> <!--{!ord.Quantity_Shipped__c}-->
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px; text-align: center;">0.00</td><!--{!ord.Quantity_Backordered__c}-->
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px; text-align: center;">
+                                <span style="display:{!IF(ord.PricebookEntry.ProductCode =='/C','','none')}"></span>
+                                    <span style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                                        <span style="display:{!IF(ord.UnitPrice!=null,'','none')}">
+                                            <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                                            <apex:param value="{!ord.UnitPrice}"/>
+                                        </apex:outputText> 
+                                    </span> 
+                                    <span style="display:{!IF(ord.UnitPrice==null,'','none')}">
+                                        0.0 
+                                    </span>
+                                </span>
+                    <!--<span style="display:{!IF(ord.UnitPrice!=null,'','none')}">
+                        <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                            <apex:param value="{!ord.UnitPrice}"/>
+                        </apex:outputText> 
+                    </span> 
+                    <span style="display:{!IF(ord.UnitPrice==null,'','none')}">
+                           0.0 
+                    </span>-->                 
+                
+                </td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; 
+                            border-left-width: 0px;border-bottom-width: 0px;border-top-width: 0px; text-align: right;">
+                    <span style="display:{!IF(ord.PricebookEntry.ProductCode =='/C','','none')}"></span>
+                        <span style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                            <span style="display:{!IF(ord.GUMU__ExtensionAmt__c!=null,'','none')}">
+                            <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                            <apex:param value="{!ord.GUMU__ExtensionAmt__c}"/>
+                            </apex:outputText> 
+                        </span> 
+                        <span style="display:{!IF(ord.GUMU__ExtensionAmt__c==null,'','none')}">
+                            0.0 
+                        </span>  
+                    </span>
+                    
+                    <!--<span style="display:{!IF(ord.GUMU__ExtensionAmt__c!=null,'','none')}">
+                        <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                            <apex:param value="{!ord.GUMU__ExtensionAmt__c}"/>
+                        </apex:outputText> 
+                    </span> 
+                    <span style="display:{!IF(ord.GUMU__ExtensionAmt__c==null,'','none')}">
+                            0.0 
+                    </span>-->             
+                </td>
+            </tr>
+          
+            <tr style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                            border-left-width: 0px; text-align: left; padding-left: 15px; " colspan="5">
+                  <!--  {!ord.Description}-->
+                    
+                <span style="display:{!IF(ord.PricebookEntry.ProductCode =='/C','','none')}"></span>
+                <span style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                    {!ord.Description}
+                </span>
+                </td>
+               
+                <!--<td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">&nbsp;</td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">&nbsp;</td>-->
+                
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                            border-left-width: 0px; text-align: right ; padding-left: 14px; " >
+                <span style="display:{!IF(ord.PricebookEntry.ProductCode =='/C','','none')}"></span>
+                <span style="display:{!IF(ord.PricebookEntry.ProductCode!='/C','','none')}">
+                    Whse:
+                </span>
+                </td>
+                
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                            border-left-width: 0px; text-align: left"  >
+                {!ord.GUMU__Warehouse_Code__c}
+                </td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">&nbsp;</td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">&nbsp;</td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">
+                       &nbsp;              
+                </td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; 
+                            border-left-width: 0px;border-bottom-width: 0px;border-top-width: 0px;">
+                        &nbsp;           
+                </td>
+                <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                                border-left-width: 0px;">&nbsp;</td>
+            </tr>
+            
+            
+            <tr>
+               <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; border-right-width: 0px; border-bottom-width: 0px;border-top-width: 0px;
+                            border-left-width: 0px; text-align: left; padding-left: 75px;" colspan="15">
+                    {!ord.GUMU__Comments__c}
+               </td> 
+            </tr>
+            <tr>
+                <td style="border-bottom-width:0px!IMPORTANT; border-top-width:0px!IMPORTANT;border-left-width:0px!IMPORTANT;border-right-width:0px!IMPORTANT">
+                <span style="display:{!IF(ord.GUMU__Comments__c!='','none','')}">&nbsp;</span>
+                </td>
+            </tr>
+           <!--</span>-->
+        
+        </apex:repeat>
+       
+    </table>
+    <br/><br/>
+    <br/><br/><table id="footer" style="float:right; position: relative; bottom:0px;" width="40%">
+        <tr>
+            <td width="20%" style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">Net Order:</td>
+            <td width="20%" style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">{!subTotal}</td>
+        </tr>
+        <tr>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">Sales Tax:</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;text-align: right;"><!--{!SalesTaxVal}-->
+                <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                    <apex:param value="{!SalesTaxVal}"/>
+                </apex:outputText>
+            </td>
+        </tr>
+        <tr>
+           <!-- <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">Freight:</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">
+                <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                    <apex:param value="{!freightAmt}"/>
+                </apex:outputText> 
+            </td> -->
+            
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">Shipping and handling:</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">
+                <apex:outputText value="{0, number, ###,###,###,##0.00}"> 
+                    <apex:param value="{!fcrAmount}"/>
+                </apex:outputText> 
+            </td>
+            
+        </tr>
+        <tr>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; ">&nbsp;</td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px;"><hr></hr></td>
+        </tr>
+        <tr>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;"><b>Order Total:</b></td>
+            <td style="font: 11px 'Microsoft Sans Serif';line-height: 14px; text-align: right;">{!orderTotal}</td>
+        </tr>
+    </table>
+    
+</apex:page>
