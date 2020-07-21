@@ -1,0 +1,511 @@
+public with sharing class SOPdfPageController 
+{
+    public string quoteDate{get;set;}
+    public decimal fcrAmount{get;set;}
+    public string quoteNumber{get;set;}
+    public string accId{get;set;}
+    public string acctNumber{get;set;}
+    public string acctName{get;set;}
+    public string accountName{get;set;}
+    public string shipToName{get;set;}
+    public string billingStreet{get;set;}
+    public string billingCountry{get;set;}
+    public string billingCity{get;set;}
+    public string billingCountryCode{get;set;}
+    public string billingPostalCode{get;set;}
+    public string billingState{get;set;}
+    public string shippingCity{get;set;}
+    public string shippingCountry{get;set;}
+    public string shippingPostalCode{get;set;}
+    public string shippingState{get;set;}
+    public string shippingStreet{get;set;}
+    public string contactName{get;set;}
+    public string PONumber{get;set;}
+    public string shipVia{get;set;}
+    public string termsCode{get;set;}
+    public decimal subTotal{get;set;}
+    public double shippingFee{get;set;}
+    public double salesTaxAmt{get;set;}
+    public double totalAmt{get;set;}
+    public list<OrderItem> ordItemData{get;set;}
+    public string orderId;
+    public string strFOB{get;set;}
+    public decimal freightAmt{get;set;}
+    public decimal SalesTaxVal{get;set;}
+    public decimal orderTotal{get;set;}
+    public map<string,string> warehousecodeDesc{get;set;}
+    public map<string,string> shipcodeDesc{get;set;}
+    public map<string,string> termsCodeDesc{get;set;}
+    public map<string,string> salesCodeDesc{get;set;}
+    public string salesperson{get;set;}
+    public map<string,string> taxCodeDesc{get;set;}
+    public string taxSchedule{get;set;}
+    public string email{get;set;}
+    public string fax{get;set;}
+    public string phone{get;set;}
+    public string shipdate{get;set;}
+    public list<string> lstStr{get;set;}
+    public string ContactNameText{get;set;}
+    public string ConfrimToName{get;set;}
+    /*public string qtyShipped{get;set;}
+    public decimal qtyBackOrdered{get;set;}*/
+    public string shippingStreet1{get;set;}
+    public string shippingStreet2{get;set;}
+    public string shippingStreet3{get;set;}
+    public string BillingStreet1{get;set;}
+    public string BillingStreet2{get;set;}
+    public string BillingStreet3{get;set;}
+    
+    
+    public SOPdfPageController()
+    {
+        warehousecodeDesc=new map<string,string>();
+        shipcodeDesc=new map<string,string>();
+        termsCodeDesc=new map<string,string>();
+        salesCodeDesc=new map<string,string>();
+        taxCodeDesc=new map<string,string>();
+        lstStr=new list<string>();
+
+        if(ApexPages.currentPage().getParameters().get('id')!=null)
+            orderId = ApexPages.currentPage().getParameters().get('id');
+
+        if(orderId!=null && String.isNotBlank(orderId) && !Test.isRunningTest())
+        {
+            System.debug('orderid--'+orderId);
+            fetchOrderData();
+            system.debug('Inside If');
+            fetchOrderItenData();
+
+            //orderTotal=totalAmt+freightAmt;
+            orderTotal=subTotal+SalesTaxVal+freightAmt;
+        }
+    
+        order ord;
+        if(!Test.isRunningTest())
+            ord= [select Id,GUMU__ERP_Order_Number__c from order where id=:orderId limit 1];
+        else
+            ord= [select Id,GUMU__ERP_Order_Number__c from order limit 1];
+
+        system.debug('ord:--'+ord);
+        if(ord!=null)
+        {
+            string orderNo=ord.GUMU__ERP_Order_Number__c ;
+            system.debug('orderNo:--'+orderNo);
+            String myGeneratedFileName = 'Sales Order-'+orderNo+'.pdf';
+            Apexpages.currentPage().getHeaders().put('content-disposition', 'filename='+myGeneratedFilename);
+	    
+	  	    
+        }
+    
+    }
+
+    public void fetchOrderData()
+    {
+        Order orderData=[select id,EffectiveDate,GUMU__ERP_Order_Number__c,Account.GUMU__ERP_Customer_Number__c,gumu__Ship_Expire_Date__c,
+                        Account.name,Account.billingAddress,billingState,billingStreet,GUMU__FreightAmt__c,GUMU__FOB__c,AccountID,OrderReferenceNumber,
+                        billingCountry,billingCity,GUMU__ShipVia__c,GUMU__Sales_Person__c,GUMU__Tax_Schedule__c,GUMU__UserName__c,
+                        PoNumber,GUMU__ShipToName__c,shippingPostalCode,CustomerAuthorizedBy.name,CustomerAuthorizedByid ,GUMU__Reference_No__c,
+                        GUMU__TermsCode__c,TotalAmount,GUMU__ERP_Order_Total__c,shippingCity,shippingCountry,shippingState,GUMU__SalesTaxAmt__c,
+                        shippingStreet,Account.billingPostalCode,GUMU__Batch_Number__c
+                        from order 
+                        where id=:orderId];
+
+        if(orderData!=null)
+        {
+            // fetch fax from SO screen
+            fax=orderData.GUMU__Batch_Number__c;
+            system.debug('fax;--'+fax);
+            
+            if(string.isNotBlank(string.valueOf(orderData.EffectiveDate)))
+            quoteDate=DateFormat(string.valueof(orderData.EffectiveDate));
+            system.debug('quoteDate;--'+quoteDate);
+            
+            if(string.isNotBlank(orderData.GUMU__ERP_Order_Number__c))
+            quoteNumber=orderData.GUMU__ERP_Order_Number__c;
+            
+            if(string.isNotBlank(orderData.Account.GUMU__ERP_Customer_Number__c))
+            acctNumber=orderData.Account.GUMU__ERP_Customer_Number__c;
+            system.debug('acctNumber;--'+acctNumber);
+            
+            // get the account id
+            accId = orderData.AccountId;
+            
+            if(string.isNotBlank(orderData.Account.name))
+            acctName=orderData.Account.name;
+            system.debug('acctName--'+acctName);
+            
+            if(string.isNotBlank(orderData.Account.name))
+            accountName=orderData.Account.name;
+            system.debug('accountName--'+accountName);
+            
+            if(string.isNotBlank(orderData.billingStreet))
+            billingStreet=orderData.billingStreet;
+            system.debug(' billingStreet--'+billingStreet);
+            
+            if(string.isNotBlank(orderData.billingCountry))
+            billingCountry=orderData.billingCountry;
+            
+            system.debug(' billingCountry--'+billingCountry);
+            
+            if(string.isNotBlank(orderData.billingCity))
+            billingCity=orderData.billingCity;
+            system.debug(' billingCity--'+billingCity);
+            //billingCountryCode=orderData.Account.billingCountryCode;
+            
+            //Uncomment BY ABHS : Display the postal code of PDF
+            if(string.isNotBlank(orderData.Account.billingPostalCode))
+            billingPostalCode=orderData.Account.billingPostalCode;
+            system.debug(' billingPostalCode--'+billingPostalCode);
+            
+            if(string.isNotBlank(orderData.billingState))
+            billingState=orderData.billingState;
+            system.debug(' billingState--'+billingState);
+            
+            if(string.isNotBlank(orderData.GUMU__ShipToName__c))
+            shipToName=orderData.GUMU__ShipToName__c;
+            system.debug(' shipToName--'+shipToName);
+            
+            if(string.isNotBlank(orderData.shippingCity))
+            shippingCity=orderData.shippingCity;
+            system.debug(' shippingCity--'+shippingCity);
+            
+            if(string.isNotBlank(orderData.shippingCountry))
+            shippingCountry=orderData.shippingCountry;
+            system.debug(' shippingCountry--'+shippingCountry);
+
+            //Uncomment BY ABHS : Display the postal code of PDF
+            if(string.isNotBlank(orderData.shippingPostalCode))
+            shippingPostalCode=orderData.shippingPostalCode;
+            
+            system.debug(' shippingPostalCode--'+shippingPostalCode);
+            
+            if(string.isNotBlank(orderData.shippingState))
+            shippingState=orderData.shippingState;
+            system.debug(' shippingState--'+shippingState);
+
+            shippingStreet=orderData.shippingStreet;
+            
+            
+            system.debug('shippingStreet--'+shippingStreet);
+            if(string.isNotBlank(string.valueOf(shippingStreet)))
+            { 
+                system.debug('inside if');           
+            String[] shipAddress =orderData.shippingStreet.split('\n');
+            //String shippingStreet1 ='';
+            //String shippingStreet2 ='';
+            //String shippingStreet3 ='';
+            system.debug('shipAddress.size--'+shipAddress.size());
+            system.debug('shippingStreet1--'+shippingStreet1);
+
+                    if(shipAddress.size()>2)
+                    {
+                        system.debug('inside  if size');
+                        shippingStreet1 = shipAddress[0]==null? '' : shipAddress[0];
+                        shippingStreet2 = shipAddress[1]==null? '' : shipAddress[1];
+                        shippingStreet3 = shipAddress[2]==null? '' : shipAddress[2];
+                        
+                    }
+                    else if(shipAddress.size()>1)
+                    {
+                        shippingStreet1 = shipAddress[0]==null? '' : shipAddress[0];
+                        shippingStreet2 = shipAddress[1]==null? '' : shipAddress[1];
+                    }
+                    else if(shipAddress.size()>0)
+                    {
+                        shippingStreet1 = shipAddress[0]==null? '' : shipAddress[0];
+                    }
+                }
+                else
+               {
+                   system.debug('inside else');
+                   shippingStreet='';
+                   shippingStreet1='';
+                   shippingStreet2='';
+                   shippingStreet3='';
+                   
+               }
+               
+            
+            
+            if(string.isNotBlank(string.valueOf(orderData.BillingStreet)))
+            {
+                String[] billAddress = orderData.BillingStreet.split('\n');
+                System.debug('billAddress ----'+billAddress);
+                system.debug('inside  if bill');
+                    if(billAddress.size()>2)
+                    {
+                        system.debug('inside  else bill size 2');
+                        System.debug('billAddress ----'+billAddress);
+                        BillingStreet1 = billAddress[0]==null? '' : billAddress[0];
+                        System.debug('BillingStreet1---'+BillingStreet1);
+                        BillingStreet2 = billAddress[1]==null? '' : billAddress[1];
+                        System.debug('BillingStreet2----'+BillingStreet2);
+                        BillingStreet3 = billAddress[2]==null? '' : billAddress[2];
+                        System.debug('BillingStreet3---'+BillingStreet3);
+                        
+                    }
+                    else if(billAddress.size()>1)
+                    {
+                        BillingStreet1 = billAddress[0]==null? '' : billAddress[0];
+                        System.debug('BillingStreet1---'+BillingStreet1);
+                        BillingStreet2 = billAddress[1]==null? '' : billAddress[1];
+                        System.debug('BillingStreet2---'+BillingStreet2);
+                    }
+                    else if(billAddress.size()>0)
+                    {
+                        BillingStreet1 = billAddress[0]==null? '' : billAddress[0];
+                        System.debug('BillingStreet1---'+BillingStreet1);
+                    }
+                    
+               }
+               else
+               {
+                   system.debug('inside  else bill');
+                   BillingStreet='';
+                   BillingStreet1='';
+                   BillingStreet2='';
+                   BillingStreet3='';
+                   
+               }
+                 
+                    
+                    
+            
+            
+            
+            if(orderData.GUMU__SalesTaxAmt__c != null)
+                SalesTaxVal = orderData.GUMU__SalesTaxAmt__c;
+            else
+                  SalesTaxVal = 0.00;  
+            
+            if(orderData.GUMU__Reference_No__c!=null)
+            {
+                system.debug('1 Email present');
+                email=orderData.GUMU__Reference_No__c;
+            }
+            
+            
+            if(orderData.CustomerAuthorizedByid!=null)
+            {
+                Contact con=[select id,name,email,Fax,phone from Contact where id=:orderData.CustomerAuthorizedByid ];
+                system.debug('con***'+con);
+                if(con!=null)
+                {
+                    system.debug('fetch contact Data***');
+                    contactName=con.Name;
+                    email=con.email;
+                    phone=con.phone;
+                    system.debug('phone***'+phone);
+                    if(fax == null)
+                    {
+                      // fetch fax from contact 
+                      fax=con.Fax;
+                    }
+                }
+                
+               
+                if(string.IsBlank(phone) || string.IsBlank(fax))
+                {
+                    system.debug('Inside IF***');
+                    // change the where condition from customer number checking to record id
+                    Account Act =[select id,name,Phone,Fax from Account where id=:accId];
+                    if(Act!=null)
+                    {
+                        system.debug('fetch Account details******');
+                        //email=Act.email;
+                        phone=Act.phone;
+                        fax=Act.Fax;
+                    } 
+                }
+            }
+            else
+            {
+               system.debug('inside else 142');
+               //if(orderData.GUMU__UserName__c!=null)
+               //{
+                   contactName=orderData.GUMU__UserName__c;
+                   
+                  // change the where condition from customer number checking to account id
+                  // GUMU__ERP_Customer_Number__c=:acctNumber
+                  // to
+                  // id = accId
+                   Account Acts =[select id,name,Phone,Fax from Account where id=:accID];
+                   system.debug('Acts **'+Acts);
+                   if(Acts!=null)
+                    {
+                        system.debug('fetch else Account details******');
+                        phone=Acts.phone;
+                        if(fax == null)
+                        {
+                          // fetch fax from contact 
+                          fax=Acts.Fax;
+                          system.debug('fax:--'+fax);
+                        }
+                      
+                        
+                    } 
+               //}
+            }
+
+            PONumber=orderData.OrderReferenceNumber;
+            shipVia=orderData.GUMU__ShipVia__c;
+            termsCode=orderData.GUMU__TermsCode__c;
+            salesperson=orderData.GUMU__Sales_Person__c;
+            taxSchedule=orderData.GUMU__Tax_Schedule__c;
+            strFOB=orderData.GUMU__FOB__c;
+            
+            if(string.isNotBlank(string.valueOf(orderData.GUMU__Ship_Expire_Date__c)))
+            shipdate=DateFormat(string.valueOf(orderData.GUMU__Ship_Expire_Date__c));
+
+            if(orderData.TotalAmount!=null)
+                subTotal=orderData.TotalAmount;
+            else
+                subTotal=0;
+         
+            if(orderData.GUMU__ERP_Order_Total__c!=null)
+                totalAmt=orderData.GUMU__ERP_Order_Total__c;
+            else
+                totalAmt=0;
+
+            if(orderData.GUMU__FreightAmt__c!=null)
+                freightAmt=orderData.GUMU__FreightAmt__c;
+            else
+                freightAmt=0.00;
+    }
+    }
+
+    public list<OrderItem> fetchOrderItenData()
+    {
+        system.debug('Inside fetchOrderItenData');
+        ordItemData=new list<OrderItem>();
+        list<OrderItem> orderList = new list<OrderItem>();
+        
+        //String orderitemquery='select id,UnitPrice,GUMU__ExtensionAmt__c,GUMU__UOM__c,Description,Quantity,Product2.name,PricebookEntry.ProductCode,GUMU__Warehouse_Code__c,listprice,GUMU__Comments__c from OrderItem where OrderId=\''+orderId+'\' and (ExplodedKit__c=\'Y\' OR SalesKitLineKey__c=\'\') order by createddate asc';
+        String orderitemquery='select id,UnitPrice,GUMU__ExtensionAmt__c,GUMU__UOM__c,Description,Quantity,Product2.name,PricebookEntry.ProductCode,GUMU__Warehouse_Code__c,listprice,GUMU__Comments__c from OrderItem where OrderId=\''+orderId+'\' order by createddate asc';
+    
+        system.debug('orderitemquery--'+orderitemquery);                            
+        orderList = Database.query(orderitemquery);
+
+        
+        /*orderList=[select id,UnitPrice,GUMU__ExtensionAmt__c,GUMU__UOM__c,Description,Quantity,Product2.name,
+                                    PricebookEntry.ProductCode,GUMU__Warehouse_Code__c,listprice,Quantity_Shipped__c,GUMU__Comments__c,
+                                    Quantity_Backordered__c
+                                    from OrderItem where OrderId=:orderId and (ExplodedKit__c='Y' OR SalesKitLineKey__c='')];*/
+                                    //ProductCode
+        
+        string prodName;
+        if(orderList.size()>0)
+        {
+            for(OrderItem itm:orderList)
+            {
+                prodName =itm.PricebookEntry.ProductCode;
+                system.debug('prodName :--'+prodName );
+            }
+        }
+        
+        list<GUMU__Ship_Via__c> shipViaValue=[select id,name,GUMU__Ship_Via_Code__c, GUMU__Ship_Via_Description__c 
+                                                from GUMU__Ship_Via__c where GUMU__Ship_Via_Code__c=:shipVia];
+                                                
+        system.debug('shipViaValue**'+shipViaValue);
+        if(shipViaValue.size()>0)
+        {                                        
+            for(GUMU__Ship_Via__c ship:shipViaValue)
+            {               
+                shipcodeDesc.put(ship.GUMU__Ship_Via_Code__c,ship.GUMU__Ship_Via_Description__c);
+            }
+        }
+        else
+        {
+            shipcodeDesc.put(shipVia,'NA');
+        }
+        system.debug('shipcodeDesc-'+shipcodeDesc);
+
+        list<GUMU__Terms_Code__c> termsCodeValue=[select id,name,GUMU__Terms_Code__c, GUMU__Terms_Code_Description__c 
+                                                from GUMU__Terms_Code__c where GUMU__Terms_Code__c=:termsCode];
+                                                
+        system.debug('termsCodeValue**'+termsCodeValue);
+        if(termsCodeValue.size()>0)
+        {                                        
+            for(GUMU__Terms_Code__c terms:termsCodeValue)
+            {               
+                termsCodeDesc.put(terms.GUMU__Terms_Code__c,terms.GUMU__Terms_Code_Description__c);
+            }
+        }
+        else
+        {
+            termsCodeDesc.put(termsCode,'NA');
+        }
+        system.debug('salesperson:'+salesperson);
+
+        list<GUMU__Salesperson__c> salesCodeValue=[select id,name,GUMU__Salesperson_Code__c, GUMU__Salesperson_Description__c 
+                                                from GUMU__Salesperson__c where GUMU__Salesperson_Code__c =:salesperson ];
+        system.debug('salesCodeValue-'+salesCodeValue);
+        if(salesCodeValue.size() >0)
+        {
+            for(GUMU__Salesperson__c sales:salesCodeValue)
+            {
+                system.debug('in');
+                salesCodeDesc.put(sales.GUMU__Salesperson_Code__c,sales.GUMU__Salesperson_Description__c);
+            }
+        }
+        else
+        {
+            salesCodeDesc.put(salesperson,'NA');
+        }
+        system.debug('salesCodeDesc-'+salesCodeDesc);
+
+        list<GUMU__Tax_Schedule__c> taxCodeValue=[select id,name,GUMU__Tax_Schedule_Code__c, GUMU__Tax_Schedule_Description__c 
+                                                from GUMU__Tax_Schedule__c where GUMU__Tax_Schedule_Code__c=:taxSchedule];
+        if(taxCodeValue.size()>0)
+        {
+            for(GUMU__Tax_Schedule__c tax:taxCodeValue)
+            {
+                taxCodeDesc.put(tax.GUMU__Tax_Schedule_Code__c,tax.GUMU__Tax_Schedule_Description__c);
+            }
+        }
+        else
+        {
+            taxCodeDesc.put(taxSchedule,'NA');
+        }
+        system.debug('taxCodeDesc-'+taxCodeDesc);
+
+        if(orderList.size()>0)
+        {    
+            for(OrderItem ord:orderList)
+            {
+                if(ord.PricebookEntry.ProductCode != '/FCR'){
+                ordItemData.add(ord);
+                    system.debug('ordItemData:==='+ordItemData);}
+                else{
+                    fcrAmount = ord.UnitPrice;
+                }
+            }
+        }
+        return ordItemData;
+    }
+    
+        public string DateFormat(string strDate)
+        {  
+            system.debug('strDate**'+strDate);
+            string formatedDate='';
+        
+            if(strDate !='')
+            {
+                string[] strdateFormat = strDate.split('-');
+                string strYear =strdateFormat[0];
+                string strMonth =strdateFormat[1];
+            
+                if(strMonth.length() ==1)
+                    strMonth= '0'+strMonth;
+            
+                if(strdateFormat[2].length() ==1)
+                    strdateFormat[2]= '0'+strdateFormat[2];
+           
+                  formatedDate = strMonth+'-'+strdateFormat[2]+'-'+strYear;
+            }
+                system.debug('formatedDate**'+formatedDate);
+                return formatedDate;
+        }
+        
+    
+}
