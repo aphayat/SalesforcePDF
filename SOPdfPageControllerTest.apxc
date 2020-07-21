@@ -1,0 +1,134 @@
+@isTest(SeeAllData=false)
+private class SOPdfPageControllerTest 
+{
+static testMethod void SOPdfPageControllerTest1()
+    {
+   SOPdfPageController.TestCoverageMethod();
+    }
+    
+    
+    static testMethod void SOPdfPageControllerTest()
+    {
+        String NameSpace;
+        NameSpace = GUMU.Utility.FetchNameSpace();
+
+        Profile p = [select id from profile where Name = 'System Administrator' limit 1];
+
+        // create User
+        String testemail = 'puseqwewr000@amamama.com';
+        User testUser = new User(profileId = p.id, username = testemail, email = testemail,emailencodingkey = 'UTF-8',
+                localesidkey = 'en_US',languagelocalekey = 'en_US', timezonesidkey = 'America/Los_Angeles',
+                alias='cspu', lastname='Test');
+        insert testUser;
+
+        //create record for Security_Matrix__c
+        GUMU__Security_Matrix__c securityMatrix = new GUMU__Security_Matrix__c(name = 'SM001',GUMU__Promote_Customer__c=true); 
+        insert securityMatrix;
+
+        //inserting data into app setting       
+        GUMU__GUMU_App_Setting__c app = new GUMU__GUMU_App_Setting__c(GUMU__Activation_Key__c='123456789',Name = 'GUMU Sage ERP 100',GUMU__ERP_System__c='Sage100ERP',
+                GUMU__Expiration_Date__c=system.today(),GUMU__No_of_Users__c=10);
+        insert app;
+
+        //create record for Configuration
+        GUMU__ERP_Config__c Config =new GUMU__ERP_Config__c();
+        Config.GUMU__ERP_System__c = 'Sage100ERP';
+        Config.Name = 'Integration-ABC';
+        Config.GUMU__Web_Service_URL__c = 'https://magentosageerp.com:28843/adxwsvc/services/CAdxWebServiceXmlCC';
+        Config.GUMU__Inactive__c = false;
+        Config.GUMU__Integration_Information__c = '<PARAMS><PARAM NAME="InstallationPath"  VALUE="C:\\Sage\\Sage 100 Advanced ERP\\MAS90\\Home\\" /><PARAM NAME="CompanyCode"  VALUE="ABX" /><PARAM NAME="Sage100Server"  VALUE="admin-PC" /><PARAM NAME="Username"  VALUE="admin" /><PARAM NAME="Password"  VALUE="Zm9'; 
+        Config.GUMU__Integration_Information_2__c = 'Ph93k8kOcel3L5gwrcfYJMxhg/vJv0xQEUasqKEw=" /><PARAM NAME="SQLServer"  VALUE="admin-PC" /><PARAM NAME="SQLCompanyInstance"  VALUE="ABX" /><PARAM NAME="WindowsDomain"  VALUE="Greytrixindia" /><PARAM NAME="WindowsUsername"  VALUE="admin" /><PARAM NAME="Windo';
+        Config.GUMU__Integration_Information_3__c = 'wsPassword"  VALUE="" /></PARAMS>';
+        Config.GUMU__Synchronization__c='Both';
+        Config.GUMU__ERP_Company_Code__c='ABX';
+        Config.GUMU__Default__c=true;
+        insert Config;
+        System.assertEquals('Sage100ERP', Config.GUMU__ERP_System__c);
+
+
+        //---------------------------------------PromoteCustomerController-------------------------Start
+
+        Account act = new Account();
+        act.GUMU__ERP_Customer_Number__c = 'saminic';
+        act.GUMU__Integration_Key__c=string.valueOf(Config.Id);   
+        act.GUMU__ERP_Company_Code__c='SAMINC';
+        act.Name = 'saminic';      
+        insert act;
+        
+        
+        Contact con=new Contact();
+        con.lastname='test';
+        con.firstname='jim';
+        con.Accountid=act.id;
+        insert con;
+
+        // price book
+        Id pricebookId = Test.getStandardPricebookId();
+        Pricebook2 pb =new Pricebook2();
+        pb.Name= Config.GUMU__ERP_System__c+' - '+ Config.GUMU__ERP_Company_Code__c;
+        pb.Description='Pricebook for '+Config.GUMU__ERP_System__c +' - '+ Config.GUMU__ERP_Company_Code__c; 
+        pb.GUMU__Integration_Key__c=Config.Id;
+        pb.IsActive=true;
+        insert pb;
+
+        GUMU__Ship_Via__c sv= new GUMU__Ship_Via__c();
+        sv.GUMU__Ship_Via_Description__c='Ship by flight';
+        sv.GUMU__Ship_Via_Code__c='Fgt';
+        insert sv;
+            
+        GUMU__Warehouse__c wh= new GUMU__Warehouse__c();
+        wh.GUMU__Warehouse_Description__c='Products warehouse';
+        wh.GUMU__Warehouse_Code__c='W01';
+        insert wh;
+        
+        GUMU__Terms_Code__c tc= new GUMU__Terms_Code__c();
+        tc.GUMU__Terms_Code_Description__c='Tax Schedule';
+        tc.GUMU__Terms_Code__c='TX01';
+        insert tc;
+        
+         
+        GUMU__Tax_Schedule__c tsch= new GUMU__Tax_Schedule__c();
+        tsch.GUMU__Tax_Schedule_Description__c='Term code';
+        tsch.GUMU__Tax_Schedule_Code__c='001';
+        insert tsch;
+            
+        GUMU__Payment_Type__c pt= new GUMU__Payment_Type__c();
+        pt.GUMU__Payment_Type_Description__c='Payment type';
+        pt.GUMU__Payment_Type_Code__c='002';
+        insert pt;       
+       
+        GUMU__Salesperson__c sp= new GUMU__Salesperson__c();
+        //sp.GUMU__Sales_Person__c='Sales person';
+        sp.GUMU__Salesperson_Code__c='S001';
+        sp.GUMU__Salesperson_Description__c='test';
+        insert sp;
+
+        Order objOrder = new Order();
+        objOrder.Name = 'John Anderson';       
+        objOrder.EffectiveDate =Date.valueof('2015-02-02');
+        objOrder.status ='Draft';
+        objOrder.GUMU__ERP_Order_Number__c = 'ORD001';
+        objOrder.GUMU__Document_Type__c = 'Order';
+        objOrder.GUMU__ERP_Order_Total__c = 600;       
+        objOrder.AccountId = act.Id;
+        objOrder.Pricebook2Id=pb.Id;
+        objOrder.GUMU__Integration_Key__c = Config.Id;
+        objOrder.GUMU__ShipVia__c ='Fgt';
+        objOrder.GUMU__Warehouse__c = 'W01';
+        objOrder.GUMU__Tax_Schedule__c = 'TX01';
+        objOrder.GUMU__TermsCode__c = '001';       
+        objOrder.GUMU__Payment_Type__c = '002';
+        objOrder.GUMU__Sales_Person__c='0100';
+        objOrder.GUMU__ARDivisionNo__c = 'AR001';
+        objOrder.CustomerAuthorizedByid=con.id;
+        objOrder.GUMU__Ship_Expire_Date__c=Date.valueof('2015-02-02');
+        objOrder.shippingStreet='The Addressline \n the address 2 \n the address 3';
+        insert objOrder;
+
+        SOPdfPageController so=new SOPdfPageController();
+        so.orderId=objOrder.id;
+        so.fetchOrderData();
+        so.fetchOrderItenData();
+        //so.TestCoverageMethod();
+    }
+}
